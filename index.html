@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#090b14">
+  <meta name="description" content="MeuStream: protótipo de uma plataforma de streaming personalizável.">
+  <title>MeuStream — Seu universo de histórias</title>
+  <style>
+    :root{--bg:#090b14;--surface:#141824;--text:#f8f8fc;--muted:#a4a8b6;--accent:#ff5571;--border:rgba(255,255,255,.10)}
+    *{box-sizing:border-box}
+    [hidden]{display:none!important}
+    html{scroll-behavior:smooth}
+    body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+    button,input{font:inherit}
+    button{cursor:pointer}
+    button:focus-visible,input:focus-visible{outline:2px solid #ffbdcb;outline-offset:3px}
+    body::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(ellipse at 10% -20%,rgba(255,84,118,.10),transparent 50%),radial-gradient(ellipse at 110% 80%,rgba(100,73,228,.09),transparent 45%);pointer-events:none}
+    .topbar{height:72px;position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:26px;padding:0 max(5vw,22px);background:rgba(9,11,20,.92);border-bottom:1px solid var(--border);backdrop-filter:blur(18px)}
+    .logo{display:flex;align-items:center;gap:10px;white-space:nowrap;font-size:23px;font-weight:900;letter-spacing:-.9px}
+    .logo-mark{width:34px;height:34px;display:grid;place-items:center;background:linear-gradient(135deg,#ff7558,#ee286c);border-radius:11px;box-shadow:0 7px 20px rgba(255,64,113,.25)}
+    .logo-mark::after{content:"";display:block;border-left:12px solid white;border-top:8px solid transparent;border-bottom:8px solid transparent;margin-left:3px}
+    .logo b{color:#ff6079}
+    .top-links{display:flex;gap:9px;margin-left:16px}
+    .top-links button,.chip{border:1px solid transparent;color:#b8bbc8;background:transparent;border-radius:30px;padding:9px 13px;font-weight:650;font-size:13px;transition:.15s}
+    .top-links button.active,.top-links button:hover,.chip.active,.chip:hover{background:rgba(255,255,255,.09);color:#fff;border-color:rgba(255,255,255,.1)}
+    .search{margin-left:auto;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border:1px solid var(--border);border-radius:12px;padding:0 13px;width:min(300px,31vw);height:42px;color:#c5c7d1}
+    .search svg{width:18px;height:18px;flex:none}
+    .search input{outline:none;color:#fff;background:transparent;border:0;width:100%;min-width:0;font-size:14px}
+    .search input::placeholder{color:#9da2b1}
+    main{max-width:1600px;margin:auto;padding:0 max(5vw,22px) 125px}
+    .hero{margin-top:25px;border-radius:24px;min-height:375px;position:relative;overflow:hidden;display:flex;align-items:center;border:1px solid rgba(255,255,255,.11);background:linear-gradient(95deg,rgba(13,15,31,.98) 0%,rgba(19,19,40,.88) 55%,rgba(14,17,40,.38) 100%),linear-gradient(140deg,#4a1a39,#171e50 55%,#21123f)}
+    .hero::before{content:"";position:absolute;inset:-40%;background:radial-gradient(circle at 75% 45%,rgba(255,92,127,.36),transparent 16%),radial-gradient(circle at 70% 52%,rgba(123,93,255,.32),transparent 28%);filter:blur(3px)}
+    .hero-scene{position:absolute;width:340px;height:340px;right:8%;top:8%;border:1px solid rgba(255,255,255,.17);border-radius:50%;box-shadow:0 0 0 42px rgba(255,255,255,.022),0 0 0 90px rgba(255,255,255,.019),0 0 100px rgba(255,86,125,.25);background:linear-gradient(150deg,rgba(255,171,141,.20),rgba(110,80,205,.22));transform:rotate(-17deg)}
+    .hero-scene::before{content:"";position:absolute;inset:65px;border-radius:50%;background:radial-gradient(circle at 40% 30%,#fda38e,#b54a85 50%,#363c8c 80%);box-shadow:0 0 50px rgba(255,140,130,.28)}
+    .hero-scene::after{content:"";position:absolute;left:-90px;top:110px;width:520px;height:95px;transform:rotate(-35deg);border-radius:50%;border:15px solid rgba(244,143,170,.22);box-shadow:0 1px 25px rgba(250,107,149,.08)}
+    .hero-content{position:relative;z-index:2;max-width:660px;padding:55px 6%}
+    .eyebrow{display:inline-flex;gap:8px;align-items:center;color:#ffbdc8;font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase}
+    .eyebrow::before{content:"";height:7px;width:7px;background:#ff718b;border-radius:50%;box-shadow:0 0 14px #ff718b}
+    .hero h1{font-size:clamp(35px,4.8vw,64px);line-height:1.04;letter-spacing:-2.2px;margin:17px 0 15px;max-width:530px}
+    .hero h1 span{background:linear-gradient(90deg,#ff778c,#e8a8fc);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .hero p{color:#d2d0df;line-height:1.65;font-size:15px;max-width:470px;margin:0 0 27px}
+    .hero-actions,.modal-actions{display:flex;align-items:center;flex-wrap:wrap;gap:12px}
+    .btn{border-radius:11px;padding:13px 19px;font-size:14px;font-weight:800;border:1px solid rgba(255,255,255,.16);display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:45px}
+    .btn-primary{color:white;background:linear-gradient(115deg,#ff695d,#f43974);border:0;box-shadow:0 7px 23px rgba(244,57,116,.25)}
+    .btn-secondary{color:white;background:rgba(255,255,255,.13);backdrop-filter:blur(8px)}
+    .btn:hover{filter:brightness(1.13)}
+    .section{margin-top:31px}
+    .section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}
+    .section-title{margin:0;font-size:21px;font-weight:850;letter-spacing:-.5px}
+    .section-sub{color:#9398aa;font-size:12px;margin-top:4px}
+    .chips{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}
+    .chips::-webkit-scrollbar{display:none}
+    .chip{white-space:nowrap;border-color:var(--border);background:rgba(255,255,255,.03);padding:10px 16px}
+    .chip.active{background:linear-gradient(100deg,rgba(255,95,118,.25),rgba(232,46,112,.13));border-color:rgba(255,108,136,.55)}
+    .grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px}
+    .media-card{min-width:0;text-align:left;color:inherit;background:transparent;border:0;padding:0;position:relative;transition:transform .22s}
+    .media-card:hover{transform:translateY(-5px)}
+    .poster{aspect-ratio:2/2.75;position:relative;isolation:isolate;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;padding:15px;border-radius:14px;background:radial-gradient(circle at 64% 28%,var(--c3),transparent 37%),linear-gradient(145deg,var(--c1),var(--c2));border:1px solid rgba(255,255,255,.12);box-shadow:0 12px 20px rgba(0,0,0,.12)}
+    .poster:before{content:"";position:absolute;z-index:-1;top:19%;left:16%;width:80%;aspect-ratio:1;border-radius:47% 53% 53% 47%;background:radial-gradient(circle at 28% 24%,rgba(255,255,255,.38),transparent 44%),rgba(255,255,255,.08);filter:blur(1px);transform:rotate(-23deg);box-shadow:0 0 0 27px rgba(255,255,255,.035),0 0 0 64px rgba(255,255,255,.021)}
+    .poster:after{content:"";position:absolute;z-index:-1;inset:45% 0 0;background:linear-gradient(transparent,rgba(3,5,16,.89))}
+    .poster-kicker{font-size:9px;font-weight:900;letter-spacing:2px;opacity:.81}
+    .poster-name{font-size:clamp(15px,1.65vw,25px);font-weight:950;line-height:1.02;letter-spacing:-.7px;text-transform:uppercase;text-wrap:balance;text-shadow:0 3px 16px rgba(0,0,0,.35);margin-top:8px}
+    .poster-symbol{position:absolute;top:27%;left:50%;transform:translate(-50%,-50%);font-size:clamp(42px,5vw,78px);filter:drop-shadow(0 9px 20px rgba(0,0,0,.2))}
+    .poster-pill{position:absolute;top:12px;left:12px;z-index:2;color:#fff;font-size:9px;font-weight:850;letter-spacing:.6px;padding:6px 8px;border-radius:7px;background:rgba(6,8,18,.42);border:1px solid rgba(255,255,255,.14)}
+    .fav-dot{position:absolute;right:10px;top:10px;z-index:2;width:29px;height:29px;display:grid;place-items:center;border-radius:50%;font-size:18px;color:#ff87a0;background:rgba(6,8,18,.6)}
+    .card-caption{padding:10px 3px 2px}
+    .card-caption strong{display:block;font-size:13px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+    .card-caption small{display:block;color:#9399aa;font-size:11px;margin-top:5px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+    .progress{height:3px;background:rgba(255,255,255,.23);border-radius:20px;overflow:hidden;margin-top:9px}
+    .progress span{display:block;height:100%;background:linear-gradient(90deg,#ff796b,#ff447a)}
+    .empty{padding:42px 20px;border-radius:16px;text-align:center;background:rgba(255,255,255,.045);border:1px dashed rgba(255,255,255,.16);color:#b6bac7}
+    .empty b{display:block;color:#fff;margin-bottom:10px}
+    .bottom-nav{display:none}
+    .overlay{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:rgba(0,0,0,.78);padding:16px;overflow-y:auto;backdrop-filter:blur(8px)}
+    .overlay[hidden]{display:none}
+    .dialog{width:min(100%,820px);max-height:95vh;overflow:auto;border-radius:21px;border:1px solid rgba(255,255,255,.16);background:#161b29;box-shadow:0 32px 100px rgba(0,0,0,.7);position:relative}
+    .close{position:absolute;right:13px;top:13px;z-index:5;border:0;border-radius:50%;display:grid;place-items:center;width:38px;height:38px;background:rgba(7,9,17,.79);color:#fff;font-size:24px}
+    .detail-cover{height:230px;position:relative;display:flex;align-items:end;padding:25px;background:radial-gradient(circle at 65% 30%,var(--c3),transparent 42%),linear-gradient(130deg,var(--c1),var(--c2))}
+    .detail-cover::before{content:"";position:absolute;inset:0;background:linear-gradient(transparent,rgba(22,27,41,.96))}
+    .detail-cover h2{margin:0;position:relative;font-size:clamp(30px,5vw,50px);letter-spacing:-1.5px;text-transform:uppercase;line-height:1.03}
+    .detail-content{padding:26px}
+    .metadata{color:#ffb0bf;font-size:12px;font-weight:800;letter-spacing:.3px}
+    .synopsis{color:#cbd0dc;line-height:1.65;font-size:15px;max-width:720px}
+    .player-wrap{background:#020308;aspect-ratio:16/9;max-height:60vh;display:grid;place-items:center}
+    .player-wrap video{width:100%;height:100%;object-fit:contain;background:#000}
+    .demo-note{font-size:12px;color:#a9afbf;margin-top:17px;line-height:1.5}
+    .footer{margin-top:46px;padding:23px 0;color:#7d8294;font-size:12px;border-top:1px solid var(--border);line-height:1.6}
+    @media(max-width:1120px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.top-links{gap:1px;margin-left:0}}
+    @media(max-width:700px){
+      .topbar{height:65px;padding:0 18px;gap:12px}.logo{font-size:20px}.logo-mark{width:30px;height:30px;border-radius:9px}.top-links{display:none}
+      .search{width:auto;flex:1;height:39px;padding:0 10px}.search input{font-size:12px}
+      main{padding:0 15px 100px}.hero{min-height:370px;margin-top:15px;border-radius:18px;align-items:flex-end}
+      .hero-scene{width:230px;height:230px;top:6%;right:-10%;opacity:.62}
+      .hero-content{padding:80px 22px 28px;background:linear-gradient(transparent,rgba(15,15,32,.53))}
+      .hero h1{font-size:38px;letter-spacing:-1.7px;margin:14px 0 12px}.hero p{font-size:13px;line-height:1.55;margin-bottom:20px}
+      .eyebrow{font-size:10px}.btn{padding:12px 14px;min-height:42px;font-size:12px}
+      .section{margin-top:27px}.section-title{font-size:19px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 12px}
+      .poster{border-radius:12px;padding:13px}.poster-name{font-size:clamp(17px,5.3vw,25px)}.poster-symbol{font-size:60px}
+      .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:28;display:flex;justify-content:space-around;background:rgba(14,16,28,.97);border-top:1px solid rgba(255,255,255,.1);padding:9px 4px max(9px,env(safe-area-inset-bottom));backdrop-filter:blur(18px)}
+      .bottom-nav button{display:grid;justify-items:center;gap:4px;min-width:60px;color:#989cac;background:transparent;border:0;font-size:10px;padding:2px 5px;font-weight:650}
+      .bottom-nav button span{font-size:21px;line-height:1.15}.bottom-nav button.active{color:#ff738d}
+      .detail-cover{height:190px}.detail-content{padding:20px}.dialog{max-height:90vh}
+    }
+    @media(max-width:360px){.logo{font-size:17px}.logo-mark{width:28px;height:28px}.search{max-width:180px}.hero h1{font-size:33px}.poster-name{font-size:16px}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo"><span class="logo-mark" aria-hidden="true"></span><span>Meu<b>Stream</b></span></div>
+    <nav class="top-links" aria-label="Navegação principal">
+      <button class="active" data-filtro="Todos">Início</button>
+      <button data-filtro="Filmes">Filmes</button>
+      <button data-filtro="Séries">Séries</button>
+      <button data-filtro="Documentários">Docs</button>
+      <button data-filtro="Minha lista">Minha lista</button>
+    </nav>
+    <label class="search" aria-label="Pesquisar no catálogo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg>
+      <input id="busca" type="search" placeholder="Buscar títulos..." autocomplete="off">
+    </label>
+  </header>
+
+  <main>
+    <section class="hero" id="hero">
+      <div class="hero-scene" aria-hidden="true"></div>
+      <div class="hero-content">
+        <div class="eyebrow">Sua nova experiência de streaming</div>
+        <h1>Histórias que te <span>levam além.</span></h1>
+        <p>Descubra filmes, séries e documentários em um só lugar. Este é o começo da sua plataforma.</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" id="assistirDestaque">▶ Assistir demonstração</button>
+          <button class="btn btn-secondary" id="conhecerDestaque">ⓘ Ver detalhes</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="continuarSection" hidden>
+      <div class="section-head"><div><h2 class="section-title">Continue assistindo</h2><div class="section-sub">Retome de onde você parou</div></div></div>
+      <div class="grid" id="continuarGrid"></div>
+    </section>
+
+    <section class="section" id="explorarSection">
+      <div class="section-head"><div><h2 class="section-title" id="tituloSecao">Explore o catálogo</h2><div class="section-sub" id="subtituloSecao">Escolha o que assistir hoje</div></div></div>
+      <div class="chips" aria-label="Filtrar categoria">
+        <button class="chip active" data-filtro="Todos">Todos</button>
+        <button class="chip" data-filtro="Filmes">Filmes</button>
+        <button class="chip" data-filtro="Séries">Séries</button>
+        <button class="chip" data-filtro="Documentários">Documentários</button>
+        <button class="chip" data-filtro="Minha lista">♥ Minha lista</button>
+      </div>
+      <div id="catalogo" class="grid" aria-live="polite"></div>
+      <div id="vazio" class="empty" hidden><b>Nenhum título encontrado</b>Tente outra pesquisa ou escolha outra categoria.</div>
+    </section>
+
+    <footer class="footer">MeuStream • Protótipo educacional de streaming. Os títulos e artes são ilustrativos; o vídeo exibido é apenas uma amostra de teste CC0. Para distribuir filmes e séries reais, utilize somente conteúdo próprio ou licenciado.</footer>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Navegação inferior">
+    <button class="active" data-filtro="Todos"><span>⌂</span>Início</button>
+    <button data-filtro="Filmes"><span>▣</span>Filmes</button>
+    <button data-filtro="Séries"><span>▤</span>Séries</button>
+    <button data-filtro="Minha lista"><span>♡</span>Minha lista</button>
+  </nav>
+
+  <div id="detalhes" class="overlay" hidden role="dialog" aria-modal="true" aria-label="Detalhes do título">
+    <div class="dialog">
+      <button class="close" id="fecharDetalhes" aria-label="Fechar detalhes">×</button>
+      <div class="detail-cover" id="detalheCapa"><h2 id="detalheTitulo"></h2></div>
+      <div class="detail-content">
+        <div class="metadata" id="detalheMeta"></div>
+        <p class="synopsis" id="detalheSinopse"></p>
+        <div class="modal-actions">
+          <button class="btn btn-primary" id="reproduzirDetalhes">▶ Assistir</button>
+          <button class="btn btn-secondary" id="favoritarDetalhes">♡ Minha lista</button>
+        </div>
+        <p class="demo-note">ℹ️ Esta versão usa um vídeo de demonstração em todos os títulos. Depois você poderá cadastrar seus vídeos autorizados.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="playerModal" class="overlay" hidden role="dialog" aria-modal="true" aria-label="Reprodutor de vídeo">
+    <div class="dialog">
+      <button class="close" id="fecharPlayer" aria-label="Fechar vídeo">×</button>
+      <div class="player-wrap"><video id="videoPlayer" controls playsinline preload="metadata"></video></div>
+      <div class="detail-content">
+        <h2 style="margin:0 0 6px;font-size:22px" id="playerTitulo">Reproduzindo</h2>
+        <p class="demo-note">Vídeo CC0 de teste (flores). Precisa de internet. O vídeo real de cada título poderá ser configurado no catálogo depois.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========== EDITE SEUS TÍTULOS AQUI ==========
+    // Para trocar o vídeo, altere o campo "video" pelo link HTTPS de um MP4 autorizado.
+    const VIDEO_DE_TESTE = 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4';
+    const CATALOGO = [
+      {id:'1',titulo:'Horizonte Azul',tipo:'Filmes',genero:'Aventura',ano:2026,duracao:'1h 42min',descricao:'Uma expedição além do horizonte transforma a vida de quem ousa descobrir o desconhecido.',icone:'🌌',c1:'#1b3674',c2:'#0e1331',c3:'#4ca2fc',video:VIDEO_DE_TESTE},
+      {id:'2',titulo:'Cidade Neon',tipo:'Séries',genero:'Ficção científica',ano:2026,duracao:'1 temporada',descricao:'Numa metrópole iluminada, uma equipe encontra segredos escondidos entre as ruas.',icone:'🌆',c1:'#643067',c2:'#1a143f',c3:'#e85a9c',video:VIDEO_DE_TESTE},
+      {id:'3',titulo:'Natureza Viva',tipo:'Documentários',genero:'Natureza',ano:2025,duracao:'52min',descricao:'Um passeio visual pelas paisagens e pelos ecossistemas que tornam o planeta extraordinário.',icone:'🌿',c1:'#206956',c2:'#071d2b',c3:'#75d9a6',video:VIDEO_DE_TESTE},
+      {id:'4',titulo:'Estação Zero',tipo:'Filmes',genero:'Suspense',ano:2026,duracao:'1h 51min',descricao:'Um sinal misterioso leva uma pesquisadora a uma estação que não aparece nos mapas.',icone:'🛰️',c1:'#6b352a',c2:'#1e1322',c3:'#ff9c67',video:VIDEO_DE_TESTE},
+      {id:'5',titulo:'Mar Profundo',tipo:'Documentários',genero:'Ciência',ano:2025,duracao:'48min',descricao:'Mergulhe em curiosidades sobre os oceanos e sobre a vida que existe abaixo da superfície.',icone:'🌊',c1:'#0e6a8b',c2:'#0b153e',c3:'#64d4e5',video:VIDEO_DE_TESTE},
+      {id:'6',titulo:'O Último Código',tipo:'Séries',genero:'Mistério',ano:2026,duracao:'2 temporadas',descricao:'Uma mensagem criptografada desencadeia uma corrida contra o tempo.',icone:'⌘',c1:'#664785',c2:'#16172c',c3:'#c79dfb',video:VIDEO_DE_TESTE},
+      {id:'7',titulo:'Estrada Solar',tipo:'Filmes',genero:'Drama',ano:2024,duracao:'1h 36min',descricao:'Dois amigos embarcam em uma viagem que muda seus planos para sempre.',icone:'☀️',c1:'#9b4b38',c2:'#3e1c2d',c3:'#ffc17b',video:VIDEO_DE_TESTE},
+      {id:'8',titulo:'Além da Lua',tipo:'Séries',genero:'Aventura espacial',ano:2026,duracao:'1 temporada',descricao:'Uma tripulação enfrenta o desconhecido em uma missão emocionante.',icone:'🌕',c1:'#37527e',c2:'#151529',c3:'#c1c4ff',video:VIDEO_DE_TESTE}
+    ];
+
+    const $ = id => document.getElementById(id);
+    const armazenamento = {
+      ler(chave, padrao){try {return JSON.parse(localStorage.getItem(chave)) ?? padrao;}catch(e){return padrao;}},
+      salvar(chave, valor){try {localStorage.setItem(chave, JSON.stringify(valor));}catch(e){/* modo privado */}}
+    };
+    let favoritos = armazenamento.ler('meustream_favoritos', []);
+    let progresso = armazenamento.ler('meustream_progresso', {});
+    if (!Array.isArray(favoritos)) favoritos=[];
+    if (!progresso || typeof progresso !== 'object') progresso={};
+    let filtro = 'Todos';
+    let tituloAtual = CATALOGO[0];
+    let emReproducao = null;
+
+    const escapar = texto => String(texto).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    function posterStyle(item){return `--c1:${item.c1};--c2:${item.c2};--c3:${item.c3}`;}
+    function card(item){
+      const percentual = progresso[item.id]?.percentual || 0;
+      return `<button class="media-card" type="button" data-id="${item.id}" aria-label="Ver detalhes de ${escapar(item.titulo)}">
+        <div class="poster" style="${posterStyle(item)}">
+          <div class="poster-pill">${item.tipo==='Documentários'?'DOC':item.tipo==='Séries'?'SÉRIE':'FILME'}</div>
+          ${favoritos.includes(item.id)?'<span class="fav-dot" aria-label="Está na minha lista">♥</span>':''}
+          <div class="poster-symbol" aria-hidden="true">${item.icone}</div>
+          <span class="poster-kicker">CATÁLOGO • DEMO</span>
+          <span class="poster-name">${escapar(item.titulo)}</span>
+        </div>
+        <div class="card-caption"><strong>${escapar(item.titulo)}</strong><small>${item.ano} · ${escapar(item.genero)}</small>
+        ${percentual>0?`<div class="progress" aria-label="${percentual}% assistido"><span style="width:${Math.min(100,percentual)}%"></span></div>`:''}</div>
+      </button>`;
+    }
+    function render(){
+      const busca = $('busca').value.trim().toLocaleLowerCase('pt-BR');
+      const selecionados = CATALOGO.filter(item=>{
+        const porCategoria = filtro==='Todos' || (filtro==='Minha lista' ? favoritos.includes(item.id) : item.tipo===filtro);
+        const porBusca = (item.titulo+' '+item.genero+' '+item.descricao).toLocaleLowerCase('pt-BR').includes(busca);
+        return porCategoria && porBusca;
+      });
+      $('catalogo').innerHTML = selecionados.map(card).join('');
+      $('vazio').hidden = selecionados.length>0;
+      $('hero').hidden = filtro!=='Todos' || busca.length>0;
+      $('tituloSecao').textContent = filtro==='Todos'?'Explore o catálogo':filtro==='Minha lista'?'Minha lista':filtro;
+      $('subtituloSecao').textContent = `${selecionados.length} título${selecionados.length===1?'':'s'} disponível${selecionados.length===1?'':'is'} nesta visualização`;
+      document.querySelectorAll('[data-filtro]').forEach(el=>{
+        const ativo = el.dataset.filtro===filtro;
+        el.classList.toggle('active',ativo);
+        el.setAttribute('aria-pressed',ativo?'true':'false');
+      });
+      const continuar = CATALOGO.filter(item=>(progresso[item.id]?.percentual||0)>0 && (progresso[item.id]?.percentual||0)<100);
+      $('continuarSection').hidden = !continuar.length || filtro!=='Todos' || busca.length>0;
+      $('continuarGrid').innerHTML = continuar.map(card).join('');
+    }
+    function setFiltro(novo){filtro=novo;render();window.scrollTo({top:0,behavior:'smooth'});}
+    function abrirDetalhes(id){
+      const item = CATALOGO.find(c=>c.id===id); if(!item)return;
+      tituloAtual=item;
+      $('detalheCapa').style.cssText=posterStyle(item);
+      $('detalheTitulo').textContent=item.titulo;
+      $('detalheMeta').textContent=`${item.ano}   •   ${item.genero}   •   ${item.duracao}   •   ${item.tipo}`;
+      $('detalheSinopse').textContent=item.descricao;
+      $('favoritarDetalhes').textContent=favoritos.includes(item.id)?'♥ Remover da minha lista':'♡ Adicionar à minha lista';
+      $('detalhes').hidden=false;document.body.style.overflow='hidden';
+    }
+    function fecharDetalhes(){ $('detalhes').hidden=true; if($('playerModal').hidden)document.body.style.overflow=''; }
+    function abrirPlayer(item){
+      if(!item)return;
+      fecharDetalhes();
+      emReproducao=item;
+      $('playerTitulo').textContent=item.titulo+' — Vídeo de teste';
+      const video=$('videoPlayer');
+      video.src=item.video;video.load();
+      $('playerModal').hidden=false;document.body.style.overflow='hidden';
+      video.addEventListener('loadedmetadata',()=>{
+        const salvo=progresso[item.id]?.segundos || 0;
+        if(salvo>0 && salvo<video.duration-2)video.currentTime=salvo;
+      },{once:true});
+      video.play().catch(()=>{}); // Alguns celulares exigem que o usuário aperte ▶ manualmente.
+    }
+    function fecharPlayer(){
+      const video=$('videoPlayer');video.pause();video.removeAttribute('src');video.load();
+      $('playerModal').hidden=true;document.body.style.overflow='';emReproducao=null;render();
+    }
+    function alternarFavorito(){
+      if(!tituloAtual)return;
+      const id=tituloAtual.id;
+      favoritos=favoritos.includes(id)?favoritos.filter(x=>x!==id):[...favoritos,id];
+      armazenamento.salvar('meustream_favoritos',favoritos);
+      $('favoritarDetalhes').textContent=favoritos.includes(id)?'♥ Remover da minha lista':'♡ Adicionar à minha lista';
+      render();
+    }
+    document.addEventListener('click',e=>{
+      const nav=e.target.closest('[data-filtro]'); if(nav)setFiltro(nav.dataset.filtro);
+      const item=e.target.closest('.media-card'); if(item)abrirDetalhes(item.dataset.id);
+      if(e.target===$('detalhes'))fecharDetalhes();
+      if(e.target===$('playerModal'))fecharPlayer();
+    });
+    $('busca').addEventListener('input',render);
+    $('assistirDestaque').addEventListener('click',()=>abrirPlayer(CATALOGO[0]));
+    $('conhecerDestaque').addEventListener('click',()=>abrirDetalhes(CATALOGO[0].id));
+    $('fecharDetalhes').addEventListener('click',fecharDetalhes);
+    $('fecharPlayer').addEventListener('click',fecharPlayer);
+    $('reproduzirDetalhes').addEventListener('click',()=>abrirPlayer(tituloAtual));
+    $('favoritarDetalhes').addEventListener('click',alternarFavorito);
+    $('videoPlayer').addEventListener('timeupdate',()=>{
+      const video=$('videoPlayer');
+      if(!emReproducao || !Number.isFinite(video.duration)||video.duration<=0)return;
+      progresso[emReproducao.id]={segundos:Math.floor(video.currentTime),percentual:Math.min(99,Math.round(video.currentTime/video.duration*100))};
+      armazenamento.salvar('meustream_progresso',progresso);
+    });
+    $('videoPlayer').addEventListener('ended',()=>{
+      if(!emReproducao)return;
+      progresso[emReproducao.id]={segundos:0,percentual:100};
+      armazenamento.salvar('meustream_progresso',progresso);
+    });
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('playerModal').hidden)fecharPlayer();else if(!$('detalhes').hidden)fecharDetalhes();}});
+    render();
+  </script>
+</body>
+</html>
